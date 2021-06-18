@@ -6,6 +6,7 @@ import { BaseContext, Next } from 'koa';
 import * as WebSocket from 'ws';
 import * as http from 'http';
 import { Server } from 'http';
+import * as chokidar from 'chokidar';
 
 function getClientCode() {
   const clientCodePath = path.resolve(__dirname, '../client/index.js');
@@ -13,15 +14,17 @@ function getClientCode() {
   return hmrClientCode.toString();
 }
 
-function createHmrMiddleware(server: Server) {
+function createHmrMiddleware(cwd: string, server: Server) {
   const hmrClientCode = getClientCode();
+  let socket: WebSocket = null;
 
+  // websocket support
   const wss = new WebSocket.Server({
     server: server,
   });
 
-  wss.on('connection', (socket) => {
-    console.log('wss started!');
+  wss.on('connection', (ws) => {
+    socket = ws;
     socket.send(JSON.stringify({ type: 'connected' }));
   });
 
@@ -29,6 +32,23 @@ function createHmrMiddleware(server: Server) {
     console.error(e);
   });
 
+  // file watcher support
+  const watcher = chokidar.watch(cwd, {
+    ignored: [/node_modules/],
+  });
+
+  watcher.on('change', async (file: string) => {
+    console.log(file);
+
+    const send = (payload: any) => {
+      console.log(`[hmr] ${JSON.stringify(payload)}`);
+      socket.send(JSON.stringify(payload));
+    };
+
+    send({
+      type: 'full-reload',
+    });
+  });
 
   return async function(ctx: BaseContext, next: Next) {
     const { path } = ctx;
@@ -52,7 +72,7 @@ export async function createServer(port: number, workingDir: string = process.cw
   const server = http.createServer(app.callback());
 
   // hmr client
-  app.use(createHmrMiddleware(server));
+  app.use(createHmrMiddleware(workingDir, server));
 
   // file server
   app.use(createFileServerMiddleware(workingDir));

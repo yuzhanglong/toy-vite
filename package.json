@@ -30,6 +30,7 @@
   "dependencies": {
     "@types/koa": "^2.13.3",
     "@types/ws": "^7.4.5",
+    "chokidar": "^3.5.2",
     "koa": "^2.13.1",
     "koa-static": "^5.0.0",
     "ws": "^7.5.0"
