@@ -15,33 +15,8 @@
     "lib:esm": "tsc -p tsconfig.json --target ESNext --module ESNext --outDir esm",
     "build": "run-p lib:*",
     "clean": "rimraf lib esm",
-    "start": "tsc -w"
-  },
-  "eslintConfig": {
-    "env": {
-      "browser": true,
-      "node": true
-    },
-    "parserOptions": {
-      "ecmaVersion": 2018,
-      "sourceType": "module"
-    },
-    "plugins": [
-      "@typescript-eslint"
-    ],
-    "extends": [
-      "eslint:recommended"
-    ],
-    "rules": {
-      "no-multiple-empty-lines": 1,
-      "@typescript-eslint/ban-ts-comment": "off",
-      "@typescript-eslint/explicit-module-boundary-types": "off",
-      "@typescript-eslint/no-empty-function": "off",
-      "@typescript-eslint/no-empty-interface": "warn",
-      "@typescript-eslint/no-explicit-any": "off",
-      "@typescript-eslint/no-var-requires": "off"
-    },
-    "root": true
+    "start": "tsc -w",
+    "server": "node ./lib/server/index.js"
   },
   "devDependencies": {
     "@types/node": "^15.12.2",
@@ -51,5 +26,10 @@
     "npm-run-all": "^4.1.5",
     "rimraf": "^3.0.2",
     "typescript": "^4.2.3"
+  },
+  "dependencies": {
+    "@types/koa": "^2.13.3",
+    "koa": "^2.13.1",
+    "koa-static": "^5.0.0"
   }
 }
