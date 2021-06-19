@@ -13,8 +13,12 @@ module.exports = {
   ],
   'extends': [
     'eslint:recommended',
+    'plugin:import/errors',
+    'plugin:import/warnings',
+    'plugin:import/typescript',
   ],
   'rules': {
+    'import/order': 'error',
     'no-multiple-empty-lines': 1,
     '@typescript-eslint/ban-ts-comment': 'off',
     '@typescript-eslint/explicit-module-boundary-types': 'off',

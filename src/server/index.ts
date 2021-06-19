@@ -1,13 +1,13 @@
-import * as Koa from 'koa';
 import * as path from 'path';
+import * as http from 'http';
+import { Server } from 'http';
+import { promises as fs } from 'fs';
+import * as Koa from 'koa';
 import * as serveStatic from 'koa-static';
 import { BaseContext, Next } from 'koa';
 import * as WebSocket from 'ws';
-import * as http from 'http';
-import { Server } from 'http';
 import * as chokidar from 'chokidar';
 import { rewrite } from './rewrite';
-import { promises as fs } from 'fs';
 import { resolveModulePath } from './resolve';
 
 async function getClientCode() {
