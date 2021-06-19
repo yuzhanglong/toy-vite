@@ -15,3 +15,5 @@ yarn.lock
 # build files
 esm
 lib
+
+.cache

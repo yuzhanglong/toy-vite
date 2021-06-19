@@ -8,6 +8,7 @@ import { Server } from 'http';
 import * as chokidar from 'chokidar';
 import { rewrite } from './rewrite';
 import { promises as fs } from 'fs';
+import { resolveModulePath } from './resolve';
 
 async function getClientCode() {
   const clientCodePath = path.resolve(__dirname, '../client/index.js');
@@ -74,7 +75,13 @@ function createSourceMiddleware(workDir: string) {
 
     //  js file
     if (sourcePath.startsWith('/__modules/')) {
-      ctx.body = '222';
+      const res = resolveModulePath(sourcePath.replace('/__modules/', ''), workDir);
+      const content = await fs.readFile(res, {
+        encoding: 'utf-8',
+      });
+      ctx.set('Content-Type', 'application/javascript');
+      ctx.body = content;
+
     } else if (sourcePath.endsWith('.js')) {
       const filename = path.join(workDir, sourcePath.slice(1));
       try {
