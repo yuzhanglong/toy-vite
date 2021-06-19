@@ -28,6 +28,9 @@
     "typescript": "^4.2.3"
   },
   "dependencies": {
+    "@antv/scale": "^0.3.11",
+    "@babel/parser": "^7.14.6",
+    "@babel/types": "^7.14.5",
     "@types/koa": "^2.13.3",
     "@types/ws": "^7.4.5",
     "chokidar": "^3.5.2",

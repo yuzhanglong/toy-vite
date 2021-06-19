@@ -1,21 +1,23 @@
 import * as Koa from 'koa';
 import * as path from 'path';
-import * as fs from 'fs';
 import * as serveStatic from 'koa-static';
 import { BaseContext, Next } from 'koa';
 import * as WebSocket from 'ws';
 import * as http from 'http';
 import { Server } from 'http';
 import * as chokidar from 'chokidar';
+import { rewrite } from './rewrite';
+import { promises as fs } from 'fs';
 
-function getClientCode() {
+async function getClientCode() {
   const clientCodePath = path.resolve(__dirname, '../client/index.js');
-  const hmrClientCode = fs.readFileSync(clientCodePath);
-  return hmrClientCode.toString();
+  return await fs.readFile(clientCodePath, {
+    encoding: 'utf-8',
+  });
 }
 
-function createHmrMiddleware(cwd: string, server: Server) {
-  const hmrClientCode = getClientCode();
+async function createHmrMiddleware(cwd: string, server: Server) {
+  const hmrClientCode = await getClientCode();
   let socket: WebSocket = null;
 
   // websocket support
@@ -65,6 +67,32 @@ function createFileServerMiddleware(workdir: string) {
   return serveStatic(workdir);
 }
 
+function createSourceMiddleware(workDir: string) {
+  return async function(ctx: BaseContext, next: Next) {
+    // js package
+    const sourcePath = ctx.path;
+
+    //  js file
+    if (sourcePath.startsWith('/__modules/')) {
+      ctx.body = '222';
+    } else if (sourcePath.endsWith('.js')) {
+      const filename = path.join(workDir, sourcePath.slice(1));
+      try {
+        const content = await fs.readFile(filename, {
+          encoding: 'utf-8',
+        });
+
+        ctx.set('Content-Type', 'application/javascript');
+        ctx.body = rewrite(content);
+      } catch (e) {
+        console.log(e);
+      }
+    } else {
+      await next();
+    }
+  };
+}
+
 
 export async function createServer(port: number, workingDir: string = process.cwd()) {
   const app = new Koa();
@@ -72,7 +100,10 @@ export async function createServer(port: number, workingDir: string = process.cw
   const server = http.createServer(app.callback());
 
   // hmr client
-  app.use(createHmrMiddleware(workingDir, server));
+  app.use(await createHmrMiddleware(workingDir, server));
+
+  // js file
+  app.use(createSourceMiddleware(workingDir));
 
   // file server
   app.use(createFileServerMiddleware(workingDir));
