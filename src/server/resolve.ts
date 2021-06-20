@@ -5,8 +5,6 @@ const moduleNameToCachePathMap = new Map();
 
 export function resolveModulePath(id: string, workDir: string): string {
   let modulePath: string;
-
-  // fallback to node resolve
   try {
     const isScopedModule = id.startsWith('@');
     const tmp = id.split('/');
